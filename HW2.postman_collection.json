@@ -403,14 +403,24 @@
 							"//* Преобразовать пункты 12-13-14 (salary из реквеста и респонса равны) таким образом, чтобы проверка производилась циклом, в котором будет всего ОДИН тест. Имя теста должно меняться в зависимости от значения в Salary",
 							"let jsonData = pm.response.json()",
 							"let req = pm.request.url.query.toObject()",
+							"",
+							"let respSalary = pm.response.json().salary",
+							"let reqSalary = +pm.request.url.query.get(\"salary\")",
 							"// for (let i=0; i<jsonData.salary.length; i++) {",
 							"//     pm.test(`${req.salary} * ${i+1} from request = ${jsonData.salary[i]} from response`, function () {",
 							"//         pm.expect(Number(jsonData.salary[i])).to.eql(Number(req.salary)*(i+1));",
 							"//     })",
 							"// }",
-							"jsonData.salary.forEach((el, i) => {pm.test(`${req.salary} * ${i+1} from request = ${jsonData.salary[i]} from response`, function () {",
+							"jsonData.salary.forEach((el, i) => {",
+							"    pm.test(`${req.salary} * ${i+1} from request = ${jsonData.salary[i]} from response`, function () {",
 							"    pm.expect(+el).to.eql((i+1)*req.salary)",
-							"})})"
+							"})})",
+							"",
+							"jsonData.salary.forEach((salary, index) => {",
+							"    pm.test(`${reqSalary} * ${index+1} === ${salary}`, () => {",
+							"        pm.expect(reqSalary*(index+1)).to.eql(+salary)",
+							"    })",
+							"})"
 						],
 						"type": "text/javascript"
 					}
@@ -460,10 +470,13 @@
 							"//Проверить, что name в ответе равно name s request (name забрать из request.) Проверить, что age в ответе равно age s request (age забрать из request.) Проверить, что salary в ответе равно salary s request (salary забрать из request.) Глубокое сравнение без циклов. 1 тест",
 							"let jsonData = pm.response.json()",
 							"let req = pm.request.url.query.toObject()",
+							"let resp = {};",
+							"for(const key in req) {",
+							"    resp[key] = isNaN(jsonData[key]) ? jsonData[key] : +jsonData[key]",
+							"    req[key] = isNaN(req[key]) ? req[key] : +req[key]",
+							"}",
 							"pm.test(\"Age, name, salary\", function () {",
-							"    pm.expect(jsonData.toObject).to.eql(req.toObject);",
-							"    //pm.expect(jsonData.name).to.eql(req.name);",
-							"    //pm.expect(jsonData.salary).to.eql(+req.salary);",
+							"    pm.expect(req).to.deep.eql(resp);",
 							"});"
 						],
 						"type": "text/javascript"
